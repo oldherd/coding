@@ -61,7 +61,7 @@ class BIT { public:
 };
 
 const int N = 300010;
-int cntCity[N], deadpls[N], a[N], root[N], f[N];;
+int cntCity[N], deadpls[N], a[N], root[N], f[N], c[N];
 ll h[N], v[N];
 
 vector< vector<int> > G;
@@ -75,7 +75,8 @@ void pushdown(int x) {
     t[t[x].ls].hp *= t[x].tagy; t[t[x].rs].hp *= t[x].tagy;
     t[t[x].ls].tagy *= t[x].tagy; t[t[x].rs].tagy *= t[x].tagy;
     t[t[x].ls].hp += t[x].tagx; t[t[x].rs].hp += t[x].tagx;
-    t[t[x].ls].tagx += t[x].tagx; t[t[x].rs].tagx += t[x].tagx;
+    t[t[x].ls].tagx = t[t[x].ls].tagx * t[x].tagy + t[x].tagx;
+    t[t[x].rs].tagx = t[t[x].rs].tagx * t[x].tagy + t[x].tagx;
     t[x].tagy = 1; t[x].tagx = 0;
 }
 
@@ -84,7 +85,6 @@ int merge(int x, int y) {
     if(t[x].hp > t[y].hp) swap(x, y);
     if(!t[x].tagx || t[x].tagy != 1) pushdown(x);
     if(!t[y].tagx || t[y].tagy != 1) pushdown(y);
-    if(!t[t[x].rs].tagx || t[t[x].rs].tagy != 1) pushdown(t[x].rs);
     t[x].rs = merge(t[x].rs, y);
     if(t[t[x].ls].dis < t[t[x].rs].dis) swap(t[x].ls, t[x].rs);
     t[x].dis = t[t[x].rs].dis + 1;
@@ -108,43 +108,41 @@ int main() {
         freopen("yl.in", "r", stdin);
         freopen("yl.out", "w", stdout);
     }
-    int tests = 1;
-    //int Mod = ;
-    rep(i,1,tests) {
-        int n, m;
-        scanf("%d %d", &n, &m);
-        G.resize(n + 1);
-        for(int i = 1; i <= n; ++i) scanf("%lld", h + i);
-        int c;
-        ll s;
-        for(int i = 1; i <= n; ++i) {
-            scanf("%d %d %lld", f + i, a + i, v + i);
-            G[f[i]].push_back(i);
+    int n, m;
+    scanf("%d %d", &n, &m);
+    G.resize(n + 1);
+    for(int i = 1; i <= n; ++i) scanf("%lld", h + i);
+    ll s;
+    for(int i = 2; i <= n; ++i) {
+        scanf("%d %d %lld", f + i, a + i, v + i);
+        G[f[i]].push_back(i);
+    }
+    for(int i = 1; i <= m; ++i) {
+        scanf("%lld %d", &s, c + i);
+        t[i].hp = s; t[i].tagy = 1; t[i].id = i;
+        root[c[i]] = merge(root[c[i]], i);
+    }
+    dfs(1);
+    for(int i = stop; i; --i) {
+        int cur = stack[i];
+        while(root[cur] && t[root[cur]].hp < h[i]) {
+            deadpls[t[root[cur]].id] = cur;
+            del(cur);
+            ++cntCity[cur];
         }
-        for(int i = 1; i <= m; ++i) {
-            scanf("%lld %d", &s, &c);
-            t[i].hp = s; t[i].tagy = 1; t[i].id = i;
-            root[c] = merge(root[c], i);
-        }
-        dfs(1);
-        for(int i = stop; i; --i) {
-            int cur = stack[i];
-            while(root[cur] && t[root[cur]].hp < h[i]) {
-                deadpls[t[root[cur]].id] = cur;
-                del(cur);
+        if(root[cur]) {
+            if(a[i] == 1) {
+                t[root[cur]].hp *= v[i];
+                t[root[cur]].tagy *= v[i];
+                t[root[cur]].tagx *= v[i];
+            } else {
+                t[root[cur]].hp += v[i];
+                t[root[cur]].tagx += v[i];
             }
-            if(root[cur]) {
-                if(a[i] == 1) {
-                    t[root[cur]].hp *= v[i];
-                    t[root[cur]].tagy *= v[i];
-                    t[root[cur]].tagx *= v[i];
-                } else {
-                    t[root[cur]].hp += v[i];
-                    t[root[cur]].tagx += v[i];
-                }
-                root[f[cur]] = merge(root[f[cur]], root[cur]);
-            }
+            root[f[cur]] = merge(root[f[cur]], root[cur]);
         }
     }
+    for(int i = 1; i <= n; ++i) printf("%d\n", cntCity[i]);
+    for(int i = 1; i <= m; ++i) printf("%d\n", dep[c[i]] - dep[deadpls[i]]);
     return 0;
 }
