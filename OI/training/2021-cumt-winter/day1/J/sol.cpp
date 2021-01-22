@@ -58,15 +58,24 @@ unordered_map<int, int> ans[10];
 int fac[10];
 
 inline int tovec(int *v, int num) {
-    int ret = -1;
+    int ret = -1, used[9] = {0};
     rep(i,0,8) {
-        v[i] = num % fac[8-i] - 1;
-        num /= fac[8-i];
+        int res = num / fac[8-i];
+        rep(j,0,8) {
+            if(used[j]) continue;
+            if(!res) {
+                used[j] = 1;
+                v[i] = j;
+                break;
+            }
+            --res;
+        }
+        num %= fac[8-i];
         if(v[i] == 0) ret = i;
     }
-    rep(i,0,8) cout << v[i]; cout << ' ';
-    cout << num << "#\n"; cout << endl;
-    cout.flush();
+    // rep(i,0,8) cout << v[i]; cout << ' ';
+    // cout << num << "#\n"; cout << endl;
+    // cout.flush();
     return ret;
 }
 
@@ -74,14 +83,13 @@ inline int toint( int *v ) {
     int used[9] = {0}, ret = 0;
     rep(i,0,8) {
         int t = v[i];
-        repp(i,0,v[i]) t -= used[i];
+        repp(j,0,v[i]) t -= used[j];
         ret += t * fac[8-i];
         used[v[i]] = 1;
-        cout << ret << endl;
     }
-    cout << "#" << ret << ' ';
-    rep(i,0,8) cout << v[i]; cout << endl;
-    cout.flush();
+    // cout << "#" << ret << ' ';
+    // rep(i,0,8) cout << v[i]; cout << endl;
+    // cout.flush();
     return ret;
 }
 
