@@ -11,8 +11,6 @@
 #include <queue>
 #include <vector>
 #include <string>
-#include <map>
-#include <unordered_map>
 #define rep(i,a,b) for(int i=(a);i<=(b);++i)
 #define per(i,a,b) for(int i=(a);i>=(b);--i)
 #define repp(i,a,b) for(int i=(a);i<(b);++i)
@@ -37,24 +35,7 @@ inline int genpls(string s) {
 
 const int d[] = {3, -1, 1, -3};
 const string ts[] = {"d", "l", "r", "u"};
-unordered_map<int, int> ans[10];
-
-// inline int toint(int *a) {
-//     int ret = 0;
-//     rep(i,0,8) ret = ret * 10 + a[i];
-//     return ret;
-// }
-
-// inline int tovec(int *v, int num) {
-//     int ret = 0;
-//     per(i,8,0) {
-//         v[i] = num % 10;
-//         num /= 10;
-//         if(v[i] == 0) ret = i;
-//     }
-//     return ret;
-// }
-
+int ans[10][400010];
 int fac[10];
 
 inline int tovec(int *v, int num) {
@@ -73,9 +54,6 @@ inline int tovec(int *v, int num) {
         num %= fac[8-i];
         if(v[i] == 0) ret = i;
     }
-    // rep(i,0,8) cout << v[i]; cout << ' ';
-    // cout << num << "#\n"; cout << endl;
-    // cout.flush();
     return ret;
 }
 
@@ -87,28 +65,27 @@ inline int toint( int *v ) {
         ret += t * fac[8-i];
         used[v[i]] = 1;
     }
-    // cout << "#" << ret << ' ';
-    // rep(i,0,8) cout << v[i]; cout << endl;
-    // cout.flush();
     return ret;
 }
 
 queue<int> q;
 int counter = 0;
 void bfs(int *svec, int pls) {
-    unordered_map<int,int>& mp = ans[pls];
+    auto& mp = ans[pls];
     int sint = toint(svec);
-    q.push(sint); mp[sint] = -1;
+    q.push(sint); mp[sint] = -2;
     int curvec[9];
     while(!q.empty()) {
         int curint = q.front(); q.pop();
         int pls = tovec(curvec, curint);
         repp(i,0,4) {
+            if(pls%3==2 && i==2) continue;
+            if(pls%3==0 && i==1) continue;
             int to = pls + d[i];
             if(to > -1 && to < 9) {
                 swap(curvec[to], curvec[pls]);
                 int nexint = toint(curvec);
-                if(mp.find(nexint) == mp.end()) {
+                if(!(~mp[nexint])) {
                     q.push(nexint);
                     mp[nexint] = i;
                 }
@@ -121,6 +98,7 @@ void bfs(int *svec, int pls) {
 
 void prework() {
     int a[9] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+    memset(ans, -1, sizeof(ans));
     bfs(a, 0);
     rep(i,0,7) {
         swap(a[i], a[i+1]);
@@ -129,10 +107,10 @@ void prework() {
 }
 
 int main() {
-    if(fopen("yl.in", "r")) {
-        freopen("yl.in", "r", stdin);
-        freopen("yl.out", "w", stdout);
-    }
+    // if(fopen("yl.in", "r")) {
+    //     freopen("yl.in", "r", stdin);
+    //     freopen("yl.out", "w", stdout);
+    // }
     ios::sync_with_stdio(false);
     cin.tie(NULL);
         fac[0] = fac[1] = 1;
