@@ -1,5 +1,5 @@
 /*
-  sol.cpp -- LuoguP1456 Monkey King - leftist
+  sol.cpp -- NC17134 - Symmetric Matrix - 简单递推
 */
 
 #include <cstdio>
@@ -60,49 +60,20 @@ class BIT { public:
     T qry(int x) { T ret = 0; for(; x; x -= x&(-x)) ret += c[x]; return ret; }
 };
 
-const int N = 100010;
-int dis[N], ls[N], rs[N], val[N], par[N];
-int getpar(int x) { return par[x] == x ? x : par[x] = getpar(par[x]); }
-int merge(int x, int y) {
-    // printf("%d %d\n", &x, &y);
-    if(!x || !y) return x | y;
-    if(val[x] < val[y]) swap(x, y);
-    par[y] = x;
-    rs[x] = merge(rs[x], y);
-    if(dis[ls[x]] < dis[rs[x]]) swap(ls[x], rs[x]);
-    dis[x] = dis[rs[x]] + 1;
-    return x;
-}
-int opr(int x) {
-    par[ls[x]] = ls[x]; par[rs[x]] = rs[x];
-    int r = merge(ls[x], rs[x]);
-    val[x] /= 2; ls[x] = rs[x] = 0; dis[x] = 1; par[x] = x;
-    int ret = merge(x, r);
-    return par[ret] = ret;
-}
+const int N = 1e5;
+int f[N + 5];
 
 int main() {
-    // if(fopen("yl.in", "r")) {
-    //     freopen("yl.in", "r", stdin);
-    //     freopen("yl.out", "w", stdout);
-    // }
-    freopen("offdata1.in", "r", stdin);
-    freopen("yl.out", "w", stdout);
-    int n, m, x, y;
-    while(~scanf("%d", &n)) {
-        rep(i,1,n) scanf("%d", val + i), par[i] = i, dis[i] = 1, ls[i] = rs[i] = 0;
-        scanf("%d", &m);
-        rep(t,1,m) {
-            scanf("%d %d", &x, &y);
-            x = getpar(x); y = getpar(y);
-            if(x == y) {
-                printf("-1\n");
-            } else {
-                x = opr(x); y = opr(y);
-                x = merge(x, y);
-                printf("%d\n", val[x]);
-            }
-        }
+    if(fopen("yl.in", "r")) {
+        freopen("yl.in", "r", stdin);
+        freopen("yl.out", "w", stdout);
+    }
+    f[0] = f[1] = 0; f[2] = f[3] = 1;
+    int n, m;
+    while(~scanf("%d %d", &n, &m)) {
+        Mod = m;
+        rep(i,4,n) f[i] = Dec(Mul(i - 1, Inc(f[i-1], f[i-2])), Mul(1ll * (i-1) * (i-2) / 2 % Mod, f[i-3]));
+        printf("%d\n", f[n]);
     }
     return 0;
 }
